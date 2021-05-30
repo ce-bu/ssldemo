@@ -1,0 +1,39 @@
+#!/bin/bash
+
+pushd $(dirname $0) > /dev/null
+cd ..
+root_dir=$(pwd)
+popd > /dev/null
+
+build_dir="${root_dir}"/build
+cmd=$1
+jobs=$(cat /proc/cpuinfo | grep processor | wc -l)
+
+function do_prep()
+{
+    rm -rf $build_dir
+    mkdir -p $build_dir
+    do_cmake
+}
+
+function do_cmake()
+{
+      cmake -B "$build_dir" \
+      -G Ninja \
+      -DCMAKE_BUILD_TYPE=Debug \
+      -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+      "$root_dir"
+}
+
+function do_build()
+{
+    cmake  --build "$build_dir" -j $jobs
+}
+
+
+[[ $cmd == "prep" ]] && { do_prep ; exit 0 ; }
+
+[[ $cmd == "cmake" ]] && { do_cmake ; exit 0 ; }
+
+do_build
+

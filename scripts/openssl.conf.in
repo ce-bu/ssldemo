@@ -1,0 +1,28 @@
+[ req ]
+prompt = no
+req_extensions = req_ext
+distinguished_name = dn
+#x509_extensions	= v3_ca
+
+[ dn ]
+C = US
+ST = NY
+L = New York
+O = Acme
+OU = None
+CN = www.acme.com
+emailAddress=email@acme.com
+
+[ req_ext ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = acme.com
+
+[ v3_ca ]
+subjectKeyIdentifier=hash
+authorityKeyIdentifier=keyid:always,issuer
+basicConstraints = critical,CA:true
+
+[ v3_noca ]
+basicConstraints = CA:false
