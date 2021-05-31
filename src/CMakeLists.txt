@@ -1,7 +1,7 @@
 find_package(OpenSSL REQUIRED)
 
-add_executable(client client.cpp)
-add_executable(server server.cpp)
+add_executable(client client.cpp common.cpp)
+add_executable(server server.cpp common.cpp)
 
 target_precompile_headers(client PRIVATE pch.h)
 target_precompile_headers(server PRIVATE pch.h)

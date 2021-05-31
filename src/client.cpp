@@ -7,6 +7,32 @@
 #include <glog/logging.h>
 #include "common.h"
 
+using namespace std;
+
+SSL_CTX *setup_client_context()
+{
+    SSL_CTX *ctx;
+    ctx = SSL_CTX_new(SSLv23_method());
+
+    string client_pem = get_ssl_root() / "client01.pem";
+
+    SSL_CTX_set_default_passwd_cb(ctx, [](char *buf, int size, int rwflag, void *) -> int
+                                  {
+                                      strncpy(buf, (char *)("1234"), size);
+                                      buf[size - 1] = '\0';
+                                      return (strlen(buf));
+                                  });
+
+    SSLERR_IF(!SSL_CTX_use_certificate_chain_file(ctx, client_pem.c_str()));
+
+    SSLERR_IF(SSL_CTX_use_PrivateKey_file(ctx, client_pem.c_str(), SSL_FILETYPE_PEM) != 1);
+
+    SSL_CTX_set_options(ctx, SSL_OP_ALL | SSL_OP_NO_SSLv2);
+
+    SSLFATAL_IF(SSL_CTX_set_cipher_list(ctx, CIPHER_LIST) != 1);
+    return ctx;
+}
+
 int main(int argc, char **argv)
 {
     FLAGS_logtostderr = 1;
@@ -19,7 +45,7 @@ int main(int argc, char **argv)
         exit(ERR_SSLINIT);
     }
 
-    SSL_CTX *ctx = setup_context("client01.pem");
+    SSL_CTX *ctx = setup_client_context();
 
     BIO *conn = BIO_new_connect(SERVER ":" PORT);
     SSLFATAL_IF(conn == nullptr);

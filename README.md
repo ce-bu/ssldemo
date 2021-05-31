@@ -27,3 +27,15 @@ sudo apt install -y libgoogle-glog-dev libgflags-dev
 ./build/src/client
 
 ```
+
+## Compile OpenSSL
+```
+git clone https://github.com/openssl/openssl.git
+
+./config --prefix=/opt/openssl \
+    --openssldir=/opt/openssl \
+    no-shared enable-ssl2 \
+    enable-ssl3 \
+    enable-weak-ssl-ciphers \
+    enable-ssl-trace
+```

@@ -4,6 +4,7 @@
 #include <string>
 #include <filesystem>
 #include <unistd.h>
+#include <openssl/err.h>
 
 namespace fs = std::filesystem;
 
@@ -28,29 +29,8 @@ namespace fs = std::filesystem;
 
 #define SERVER "localhost"
 #define PORT "9000"
+#define CIPHER_LIST "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH"
 
-static inline std::filesystem::path get_ssl_root()
-{
-    return fs::canonical(fs::read_symlink("/proc/self/exe").parent_path().parent_path() / "ssl");
-}
-
-static SSL_CTX *setup_context(const std::string &pem)
-{
-    SSL_CTX *ctx;
-    ctx = SSL_CTX_new(SSLv23_method());
-
-    SSL_CTX_set_default_passwd_cb(ctx, [](char *buf, int size, int rwflag, void *) -> int
-                                  {
-                                      strncpy(buf, (char *)("1234"), size);
-                                      buf[size - 1] = '\0';
-                                      return (strlen(buf));
-                                  });
-
-    fs::path cert = get_ssl_root() / pem;
-    SSLERR_IF(!SSL_CTX_use_certificate_chain_file(ctx, cert.string().c_str()));
-
-    SSLERR_IF(SSL_CTX_use_PrivateKey_file(ctx, cert.string().c_str(), SSL_FILETYPE_PEM) != 1);
-    return ctx;
-}
+std::filesystem::path get_ssl_root();
 
 #endif
